@@ -106,10 +106,11 @@ app.get('/collection/:collectionName/:id',(req,res,next)=>{
 
 
 // REST API Task : PUT route that updates the number of available spaces in the ‘lesson’ collection
-app.put('/collections/:collectionName/:id', function (req, res, next) {
-    req.collection.updateOne({ _id: new ObjectId(req.params.id) },
-        { $set: req.body },
-        { safe: true, multi: false }, function (err, result) {
+// REST API Task: PUT route that updates the number of available spaces in the ‘lesson’ collection
+app.put('/collections/lessons/:id', function (req, res, next) {
+    req.collection.updateOne({ _id: new ObjectID(req.params.id) },
+        { $set: { space: req.body } },
+        function (err, result) {
             if (err) {
                 return next(err);
             } else {
@@ -118,6 +119,7 @@ app.put('/collections/:collectionName/:id', function (req, res, next) {
         }
     ); 
 })
+
 
 
 //app.listen() binds and listens the connections on the specified host and port.
