@@ -1,0 +1,84 @@
+{
+	"id": "311a6f4f-3512-4a00-9631-a829589e188b",
+	"name": "Cw2",
+	"timestamp": "2023-02-17T13:25:03.671Z",
+	"collection_id": "0-b46963a7-626d-4694-8fb1-492d699df71a",
+	"folder_id": 0,
+	"environment_id": "0",
+	"totalPass": 0,
+	"totalFail": 0,
+	"results": [
+		{
+			"id": "2022cdbc-85b3-4edf-aa42-9f8f11182193",
+			"name": "Get",
+			"url": "http://localhost:3000/collection/lessons",
+			"time": 28,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				28
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "a631494d-626c-42cf-8106-f6929c09ee28",
+			"name": "Post",
+			"url": "http://localhost:3000/collection/orders",
+			"time": 34,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				34
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "c4ff366c-ea22-48c7-8506-408f3e31e804",
+			"name": "Put",
+			"url": "http://localhost:3000/collection/lessons/63ee3c343b0ba76b7d732e90",
+			"time": 28,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				28
+			],
+			"allTests": [
+				{}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 90,
+	"collection": {
+		"requests": [
+			{
+				"id": "2022cdbc-85b3-4edf-aa42-9f8f11182193",
+				"method": "GET"
+			},
+			{
+				"id": "a631494d-626c-42cf-8106-f6929c09ee28",
+				"method": "POST"
+			},
+			{
+				"id": "c4ff366c-ea22-48c7-8506-408f3e31e804",
+				"method": "PUT"
+			}
+		]
+	}
+}
