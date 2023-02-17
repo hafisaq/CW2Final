@@ -114,7 +114,7 @@ app.put('/collections/lessons/:id', function (req, res, next) {
             if (err) {
                 return next(err);
             } else {
-                res.send((result.matchedCount === 1) ? { msg: "success" } : { msg: "error" });
+                res.send((result = 1) ? { msg: "success" } : { msg: "error" });
             }
         }
     ); 
