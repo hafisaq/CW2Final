@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Vue.js CDN file-->
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.7.10/dist/vue.js" ></script>
+        <!-- CSS only -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" /> 
+        <link href="https://fonts.googleapis.com/css2?family=Sorts+Mill+Goudy&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="style.css">
+        <script crossorigin="use-credentials"></script>
+
+        <!-- Javascript-->
+   
+
+    </head>
+    <body>
+        <div id="app">
+            <header>
+                <!-- Button which displays the CartItemCount computed value -->
+                <nav class="navbar navbar-expand-lg navbar-light bg-light" >
+                    <h3 class="navItem">Classes</h3>
+                    <button v-if="isCartFilled()" v-on:click="showItems()">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        {{cartItemCount}}
+                    </button>
+                    <button disabled="Disabled" v-else>
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        {{cartItemCount}}
+                    </button>
+                    <!-- Sorting Section -->
+                    <!-- Button for  filtering feature-->
+                    <div class="sort-bar navItem">
+                        <select name="sortBy" v-model="sortBy">
+                            <option value="alphabetical">Alphabetical</option>
+                            <option value="price">Price</option>                
+                            <option value="location">Location</option>    
+                            <option value="availability">Availability</option>    
+                        </select>
+                        <!-- Button for enabling ascending and descending-->
+                        <button v-on:click="ascending = !ascending" class="sort-button">
+                            <i v-if="ascending" class="fa fa-sort-up"></i>
+                            <i v-else class="fa fa-sort-down"></i>
+                        </button>
+                    </div>
+                    <!-- Search bar -->
+                    <div class="search-bar navItem">
+                        <input type="text" v-model="searchValue" placeholder="Search Recipe" id="search-input"></input>
+                    </div>
+                </nav>
+            </header>
+
+            <div class="container">
+                <!-- If the checkout section is hidden-->
+                <div v-if="isHidden0">                    
+                    <button v-on:click="showCheckout()">Show Checkout</button>
+                    <h1 class="title"> Shop </h1>
+                <!-- Displaying the sorted Lessons using a v-for loop-->
+                    <div class="lessonContainer">
+                        <div v-for="lesson in sortedLessons" :key="lesson.title">
+                            <div  class="border border-white bg-light lessonBox">
+                                <figure>
+                                    <img v-bind:src="lesson.image" class="img">
+                                </figure>
+                                <h2 v-text="lesson.title"></h2>
+                                <p v-html="lesson.description"></p>
+                                <p>Price: {{lesson.price}}</p>
+                                <p>Location:{{lesson.location}}</p>
+                                <p>Left: {{lesson.space}}</p>
+                                <!-- Buttons -->
+                                <!-- Button when product.space is not 0 -->
+                                <button v-on:click="addItem(lesson)" v-if = "canAddToCart(lesson)"> <!-- 'v-on' binds js snippets with vue js-->
+                                    Add to Cart 
+                                <span class="fas fa-cart-plus" ></span>
+                                </button>
+                                <button disabled="disabled" v-else>
+                                    Add to Cart 
+                                    <span class="fas fa-cart-plus"></span>
+                                </button>
+                            <!-- Adding v-if v-else-if and v-else, if true there are no spaces, display spaces when availableInventory less than 5 and 
+                                if false display "Buy Now!"
+                            -->
+                                <span v-if="lesson.availableInventory === cartCount(lesson.id)">
+                                    All Out!
+                                </span>
+                                <span v-else-if="lesson.availableInventory - cartCount(lesson.id) < 5">
+                                    Only {{lesson.availableInventory - cartCount(lesson.id)}} left
+                                </span>
+                                <span v-else>Buy Now!</span>
+                            <!-- Adding a star rating using v-for -->
+                            </div>
+                            <br>
+                        </div>
+                    </div>
+                </div>
+                <!-- If the checkout section is visible -->
+                <div v-if="!isHidden0">
+                    <button v-on:click="showCheckout()">Show Lessons</button>
+                    <div class="cart&checkout_section">
+                        <!-- Shopping cart section -->
+                        <div class="shoppingCart"><br>
+                                <p><b>Your shopping cart</b></p>
+                                <div v-for="i in this.cart"  v-if="isCartFilled()" id="cart">
+                                    <p>{{i.title}}</p>
+                                    <p>{{i.description}}</p>
+                                    <p>{{i.price}}</p>
+                                    <p>{{i.image}}</p>
+                                    <p>{{i.location}}</p>
+                                    <p>{{i.rating}}</p>
+                                    <button v-on:click="removeItem(i.id,i.title)">Remove</button>
+                                </div>
+                                <div v-if="!isCartFilled()">
+                                    <br>
+                                    Cart is empty
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="checkoutSection">
+                            <h2>checkout</h2>
+                            <div>
+                                <h1>Checkout</h1>
+                                Full Name: <input type="text" id="name" v-model="name" v-on:change="checkName(name)"> <label
+                                    id="nameLabel"></label> <br>
+                                Phone Number: <input type="number" id="number" v-model="number"
+                                    v-on:change="checkNumber(number)"> <br>
+                                <button v-if="nameValidate==true && numberValidate==true"
+                                    v-on:click="checkout">Checkout</button>
+                                <button v-else disabled="disabled">Checkout</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Checkout section-->
+            </div>
+        </div>
+        <script>
+            let app = new Vue({
+                el:"#app",
+                data:{
+                    lessons : [],
+                    cart:[],
+                    cartList:[],
+                    ascending:true,
+                    sortBy: "alphabetical",
+                    isHidden0:true,
+                    isHidden1:false,
+                    isHidden2: false,
+                    searchValue:'',
+                    isValidName: true,
+                    isValidPhoneNumber : true,
+                    name:"",
+                    number:"",
+                    nameValidate:false,
+                    numberValidate: false,
+                    
+                },
+                created: function(){
+                // FETCH task: Fetch that retrieves all the lessons with GET
+                fetch("http://localhost:3000/collection/lessons").then(
+                    function(response){
+                        response.json().then(
+                            function(json){
+                                app.lessons=json;
+                                console.log(app.lessons)
+                            },
+                        )
+                    }
+                )
+            },
+                methods:{
+                    //method for the searchbar
+                    searcher(){
+                        this.lessons.forEach((element) => {
+                            let tText=element.title.toLowerCase();
+                            let lText=element.location.toLowerCase();
+                            if(!this.search && this.search ==="")
+                                element.show= true;
+                            let i=0;
+                            while(this.search && i < this.search.length )
+                            {
+                                let sText =this.search.toLowerCase();
+                                if (sText[i]===tText[i]|| sText[i]===lText[i])
+                                    element.show= true;
+                                else{
+                                    element.show = false;
+                                    break;
+                                }
+                                i++
+                            }
+                        });
+                    },
+                    //method for displaying and hiding the checkout
+                    showCheckout(){
+                        if(this.isHidden0 == false){
+                            this.isHidden0 = true;
+                        }else{
+                            this.isHidden0 = false;
+                        }
+                    },
+                    //method for sharing the cart
+                    showCart(){
+                        if(this.isHidden1==true){
+                            this.isHidden1 = false;
+                        }else{
+                            this.isHidden1 = true;
+                        }
+                    },
+                    //adding lesson to the cart
+                    addItem(product) {
+                        this.cart.push({
+                        title: product.title,price: product.price,description: product.description,image:product.image
+                        }),
+                        this.cartList.push(product.id)
+                        product.space = product.space - 1;
+                        product.availableInventory = product.availableInventory - 1; 
+                        console.log(JSON.stringify(this.cart));
+                    },
+                    //method for returning the count in the cart array
+                    cartCount(id){
+                        let count = 0;
+                        for(let i = 0; i < this.cart.length;i++){
+                            if(this.cart[i]=== id){
+                                count++;
+                            }
+                        }
+                        return count;
+                    },
+
+                    //checkout method
+                    checkout(){
+                        name = document.getElementById("name").value;
+                        number = document.getElementById("number").value;
+                        let lessonOrders = this.cart
+                        let spacesObj;
+
+                        // lessonOrders.forEach((el)=>{
+                        //         console.log("ID : " + el._id);
+                        //         console.log("title :" + el.title);
+                        //         console.log("spaces : " + el.space);
+                        //         //http://localhost:3000/collection/lessons/63e1e9d8ab5bf767d0f38f2a
+                        //         fetch("http://localhost:3000/collection/lessons/" + el._id,{
+                        //             method:"PUT",
+                        //             header:{
+                        //                 "Content-Type":"application/json",
+                        //             },
+                        //             body:JSON.stringify(el.space),
+                        //         })
+                        //             .then((response)=>{
+                        //                 console.log(response);
+                        //                 return response.text();
+                        //             })
+                        //             .catch((error)=>{
+                        //                 console.log("Error:",error);
+                        //             });
+                        //         console.log("Updated space for " + el.title );
+                        //     })
+                        // console.log(lessonOrders)
+
+                        // fetch that updates the lesson spaces using PUT after it is submitted
+                        for(i in this.lessons ){
+                                console.log("_ID : " + String(this.lessons[i]._id) + "\n ID : : " + this.lessons[i].id + " \n Title : " + this.lessons[i].title)
+                                fetch("http://localhost:3000/collections/lessons/" + String(this.lessons[i]._id), {
+                                    method: "PUT",
+                                    headers:{
+                                        "Content-Type":"application/json",
+                                    },
+                                    body:JSON.stringify(this.lessons[i].space),
+                                })
+                                     .then((response) => {
+                                        console.log(response);
+                                        return response.text();
+                                    })
+                                    .catch((error) => {
+                                        console.error("Error:", error);
+                                    })                            
+                                
+                        }
+                        for(i in lessonOrders){
+                            console.log(lessonOrders[i]);
+                        }
+                        let order = {
+                            name:name,
+                            number:number,
+                            lessons:lessonOrders
+                        };
+                        
+                        // Fetch that saves a new order with POST after it is submitted
+                        fetch("http://localhost:3000/collection/orders",{
+                            method:"POST",
+                            headers:{
+                                "Content-Type":"application/json",
+                            },
+                            body: JSON.stringify(order),
+                        })
+                            .then((response)=>{
+                                console.log(response);
+                                return response.text();
+                            })
+                            .catch((error)=>{
+                                console.error("Error:",error);
+                            })
+                            this.cart = [];
+                            console.log("Thank you for shopping");
+                            this.showCart();
+                            alert("Order submitted"), window.location.reload();
+                    },
+
+                    //checking if the lesson can be added to the cart 
+                    canAddToCart(product){
+                        return product.availableInventory > this.cartCount(product.id); 
+                    },
+                    //checking if the cart has at least 1 element in the cart array
+                    isCartFilled(){
+                        return this.cart.length > 0;   
+                    },
+                    // removing the item from the cart
+                    removeItem(id,title){
+                        this.cart.splice(this.cart.indexOf(id),1);   
+                        this.cartList.splice(this.cartList.indexOf(id),1);
+                        lessons[lessons.indexOf(lessons.find(o=> o.title === title))].space+=1;
+                        lessons[lessons.indexOf(lessons.find(o=> o.title === title))].availableInventory+=1;
+                    },
+
+                    // method for validating the name in the order form
+                    checkName(str) {
+                        check = /\d/.test(str);
+                        nameLabel = document.getElementById("nameLabel");
+                        if (check == true || str.trim() == "") {
+                            nameLabel.innerHTML = "Please Type an approiate name";
+                            this.nameValidate = false;
+                        }
+                        else {
+                            nameLabel.innerHTML = "";
+                            this.nameValidate = true;
+
+                        }
+                    },
+                    //method for checking the phone number
+                    checkNumber(num) {
+                        if(num == "") {
+                            this.numberValidate = false;
+                        }
+                        else{
+                            this.numberValidate = true;
+                        }
+                    },
+
+
+                    // method for validating the completeness of the checkout form
+                    checkoutValidation(){
+                        if(this.order.name == ""|| this.order.phone==""){
+                            this.isHidden2 = false;
+                            alert("Please fill out the form");
+                        } else{
+                            this.isHidden2 = true;
+                        }
+                    },
+                },
+                computed:{
+                    cartItemCount: function () {
+                    // getting the size of cart array
+                    return this.cartList.length;
+                    },
+                    sortedLessons(){
+                        if(this.searchValue != '' && this.searchValue){
+                            let lessonsArray = this.lessons;
+                            lessonsArray= lessonsArray.filter((item)=>{
+                                return item.title.toUpperCase().includes(this.searchValue.toUpperCase())||item.location.toUpperCase().includes(this.searchValue.toUpperCase());
+                            })
+                            return lessonsArray;
+                        }
+                        if(this.sortBy=="price"){
+                            if(!this.ascending){
+                                let lessonsArray = this.lessons.slice(0);
+                                function compare(a,b){
+                                    if(a.price > b.price){
+                                        return 1;
+                                    }
+                                    if(a.price<b.price){
+                                        return -1;
+                                    }
+                                    return 0;
+                                }
+                                return lessonsArray.sort(compare).reverse()
+                            }else{
+                                    let lessonsArray = this.lessons.slice(0);
+                                    function compare(a,b){
+                                        if(a.price > b.price){
+                                            return 1;
+                                        }
+                                        if(a.price<b.price){
+                                            return -1;
+                                        }
+                                        return 0;
+                                    }
+                                    return lessonsArray.sort(compare);
+                                }
+                                
+                            }
+                        if(this.sortBy =="alphabetical"){
+                            if(!this.ascending){
+                            let lessonsArray = this.lessons.slice(0);
+                            function compare(a,b){
+                                if(a.title > b.title){
+                                    return 1;
+                                }
+                                if(a.title < b.title){
+                                    return -1;
+                                }
+                                return 0;
+                            }
+                            return lessonsArray.sort(compare).reverse();
+                            // sorting them 
+                            }else{
+                                let lessonsArray = this.lessons.slice(0);
+                            function compare(a,b){
+                                if(a.title > b.title){
+                                    return 1;
+                                }
+                                if(a.title < b.title){
+                                    return -1;
+                                }
+                                return 0;
+                            }
+                            return lessonsArray.sort(compare);
+                            }
+                        }
+                        if(this.sortBy =="location"){
+                            if(!this.ascending){
+                            let lessonsArray = this.lessons.slice(0);
+                            function compare(a,b){
+                                if(a.location > b.location){
+                                    return 1;
+                                }
+                                if(a.location < b.location){
+                                    return -1;
+                                }
+                                return 0;
+                            }
+                            return lessonsArray.sort(compare).reverse();
+                            // sorting them 
+                            }else{
+                                let lessonsArray = this.lessons.slice(0);
+                            function compare(a,b){
+                                if(a.location > b.location){
+                                    return 1;
+                                }
+                                if(a.location < b.location){
+                                    return -1;
+                                }
+                                return 0;
+                            }
+                            return lessonsArray.sort(compare);
+                            }
+                        }    
+                        if(this.sortBy =="availability"){
+                            if(!this.ascending){
+                            let lessonsArray = this.lessons.slice(0);
+                            function compare(a,b){
+                                if(a.space > b.space){
+                                    return 1;
+                                }
+                                if(a.space < b.space){
+                                    return -1;
+                                }
+                                return 0;
+                            }
+                            return lessonsArray.sort(compare).reverse();
+                            // sorting them 
+                            }else{
+                                let lessonsArray = this.lessons.slice(0);
+                            function compare(a,b){
+                                if(a.space > b.space){
+                                    return 1;
+                                }
+                                if(a.space < b.space){
+                                    return -1;
+                                }
+                                return 0;
+                            }
+                            return lessonsArray.sort(compare);
+                            }
+                        }
+                    }
+                    }
+            });
+        </script>
+    </body>
+</html>
