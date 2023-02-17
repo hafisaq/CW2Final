@@ -107,19 +107,17 @@ app.get('/collection/:collectionName/:id',(req,res,next)=>{
 
 // REST API Task : PUT route that updates the number of available spaces in the ‘lesson’ collection
 // REST API Task: PUT route that updates the number of available spaces in the ‘lesson’ collection
-app.put('/collections/lessons/:id', function (req, res, next) {
-    req.collection.updateOne({ _id: new ObjectID(req.params.id) },
-        { $set: { space: req.body } },
-        function (err, result) {
-            if (err) {
-                return next(err);
-            } else {
-                res.send((result = 1) ? { msg: "success" } : { msg: "error" });
-            }
-        }
-    ); 
-})
+app.put('/collection/:collectionName/:id',(req, res)=>{
 
+    req.collection.update({_id:new ObjectId(req.params.id)},
+    {$set:req.body},
+    {safe:true,multi:false},
+    (e,result)=>{
+        if(e)return next(e)
+        res.send((result = 1)?{msg:"success"}:{msg:'error'})
+    })
+
+});
 
 
 //app.listen() binds and listens the connections on the specified host and port.
